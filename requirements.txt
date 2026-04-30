@@ -2,6 +2,10 @@
 langchain-groq
 langgraph
 pydantic
+fastapi
+uvicorn
+python-multipart
+# Add your compiler dependencies here (langgraph, etc.)
 python-dotenv
 
 # Web Server & Deployment
