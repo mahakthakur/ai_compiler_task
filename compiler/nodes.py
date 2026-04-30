@@ -13,7 +13,7 @@ llm = ChatGroq(
     model_name="openai/gpt-oss-120b",
     temperature=0,
     groq_api_key=GROQ_API_KEY,
-    response_format={"type": "json_object"}
+    
 )
 structured_llm = llm.with_structured_output(AppConfig)
 
