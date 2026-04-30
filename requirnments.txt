@@ -1,0 +1,12 @@
+# Core Logic & LLM
+langchain-groq
+langgraph
+pydantic
+python-dotenv
+
+# Web Server & Deployment
+fastapi
+uvicorn
+
+# HTTP Client (Required for some LangChain internal calls)
+httpx

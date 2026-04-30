@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Software Compiler - Output</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap');
+        body { font-family: 'Outfit', sans-serif; background-color: #0f172a; color: #e2e8f0; }
+        
+        .glass-panel {
+            background: rgba(30, 41, 59, 0.4);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .component-card {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            background: rgba(30, 41, 59, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .component-card:hover {
+            transform: translateY(-5px) scale(1.01);
+            border-color: rgba(99, 102, 241, 0.5);
+            box-shadow: 0 10px 40px -10px rgba(99, 102, 241, 0.2);
+            background: rgba(30, 41, 59, 0.8);
+        }
+
+        .sidebar-active { 
+            border-left: 3px solid #818cf8; 
+            background: linear-gradient(90deg, rgba(99,102,241,0.15) 0%, rgba(99,102,241,0) 100%); 
+            color: #e0e7ff; 
+            font-weight: 600; 
+        }
+
+        /* Animations */
+        @keyframes fadeInSlide {
+            0% { opacity: 0; transform: translateY(15px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+        
+        .animate-in {
+            animation: fadeInSlide 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            opacity: 0;
+        }
+
+        .delay-100 { animation-delay: 100ms; }
+        .delay-200 { animation-delay: 200ms; }
+        .delay-300 { animation-delay: 300ms; }
+
+        .gradient-text {
+            background: linear-gradient(135deg, #a5b4fc 0%, #c084fc 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #475569; }
+        
+        .shimmer {
+            position: relative;
+            overflow: hidden;
+        }
+        .shimmer::after {
+            content: '';
+            position: absolute;
+            top: 0; left: -100%; width: 50%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent);
+            animation: shimmer 2s infinite;
+        }
+        @keyframes shimmer { 100% { left: 200%; } }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col relative overflow-hidden">
+    <!-- Animated Background Gradients -->
+    <div class="fixed inset-0 z-0 bg-slate-950">
+        <div class="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] rounded-full bg-indigo-600/10 blur-[120px] pointer-events-none"></div>
+        <div class="absolute bottom-[-20%] right-[-10%] w-[50%] h-[50%] rounded-full bg-purple-600/10 blur-[120px] pointer-events-none"></div>
+    </div>
+
+    <div id="app" class="flex flex-col h-screen z-10 relative">
+        <header class="glass-panel border-b border-white/5 px-8 py-5">
+            <div class="container mx-auto flex flex-col md:flex-row gap-5 items-center justify-between">
+                <h1 class="text-2xl font-extrabold flex items-center gap-3 gradient-text tracking-tight">
+                    <svg class="w-8 h-8 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                    Nexus AI Compiler
+                </h1>
+                <div class="flex gap-3 w-full md:w-auto flex-1 max-w-3xl">
+                    <input id="user-prompt" type="text" 
+                           placeholder="Describe your software (e.g., 'A CRM for gym owners')..." 
+                           class="flex-1 bg-slate-900/60 border border-white/10 text-white px-4 py-3 rounded-xl focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all placeholder-slate-500 shadow-inner text-sm">
+                    <button onclick="compileSoftware()" 
+                            id="compile-btn"
+                            class="relative overflow-hidden group bg-indigo-600 hover:bg-indigo-500 text-white px-6 py-3 rounded-xl font-semibold transition-all shadow-[0_0_15px_rgba(79,70,229,0.3)] hover:shadow-[0_0_25px_rgba(79,70,229,0.5)] text-sm">
+                        <span class="relative z-10 flex items-center gap-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+                            Compile
+                        </span>
+                    </button>
+                    <button onclick="runEvaluation()" 
+                            id="eval-btn"
+                            class="bg-slate-800/80 hover:bg-slate-700 border border-white/10 text-white px-6 py-3 rounded-xl font-semibold transition-all text-sm hover:border-purple-500/50">
+                        Evaluate
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <div id="local-warning" class="hidden glass-panel border-l-4 border-l-amber-500 text-amber-200 mx-8 mt-6 p-4 rounded-r-xl shadow-lg text-sm">
+            <strong class="text-amber-400">Warning:</strong> Local file detected. Use <a href="http://localhost:8000/" class="underline text-white hover:text-amber-300">http://localhost:8000/</a>.
+        </div>
+
+        <div id="server-warning" class="hidden glass-panel border-l-4 border-l-red-500 text-red-200 mx-8 mt-6 p-4 rounded-r-xl shadow-lg text-sm">
+            <strong class="text-red-400">Server disconnected:</strong> Backend unavailable. Start it and use <a href="http://localhost:8000/" class="underline text-white hover:text-red-300">http://localhost:8000/</a>.
+        </div>
+
+        <div id="status-banner" class="hidden glass-panel mx-8 mt-6 p-4 rounded-xl shadow-lg animate-in border-l-4 text-sm">
+            <strong class="opacity-80 text-white">Status:</strong> <span id="status-text" class="font-medium text-white">Ready.</span>
+        </div>
+
+        <div class="flex flex-1 overflow-hidden mt-1">
+            <aside class="w-64 glass-panel border-r border-white/5 flex flex-col py-6 px-4 space-y-2 overflow-y-auto" id="sidebar">
+                <div class="flex items-center gap-2 mb-4 px-2">
+                    <div class="w-1.5 h-1.5 rounded-full bg-indigo-500 shadow-[0_0_8px_rgba(99,102,241,0.8)]"></div>
+                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Navigation</p>
+                </div>
+            </aside>
+
+            <main class="flex-1 overflow-y-auto p-8" id="main-content">
+                <div id="app-info" class="mb-10 hidden animate-in delay-100">
+                    <div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between pb-6 border-b border-white/5">
+                        <div>
+                            <h2 id="app-display-name" class="text-3xl font-extrabold text-white tracking-tight">App Name</h2>
+                            <p id="current-page-title" class="text-indigo-300 mt-2 text-sm font-medium flex items-center gap-2">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                                <span>Current Page</span>
+                            </p>
+                        </div>
+                        <span id="status-badge" class="px-3 py-1.5 rounded-full text-xs font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 shadow-[0_0_15px_rgba(16,185,129,0.1)] flex items-center gap-2">
+                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                            Live & Validated
+                        </span>
+                    </div>
+                </div>
+
+                <div class="grid lg:grid-cols-[2fr_1fr] gap-8">
+                    <div class="animate-in delay-200">
+                        <div id="component-grid" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="col-span-full text-center py-32 glass-panel rounded-3xl border border-white/5 flex flex-col items-center justify-center group shimmer">
+                                <div class="w-16 h-16 mb-6 rounded-full bg-indigo-500/10 flex items-center justify-center border border-indigo-500/20 group-hover:scale-110 transition-transform duration-500">
+                                    <svg class="w-8 h-8 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path></svg>
+                                </div>
+                                <h3 class="text-xl font-semibold text-white mb-2">Awaiting Instructions</h3>
+                                <p class="text-slate-400 text-sm max-w-sm">Enter a description in the top bar to synthesize a new application.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <aside id="details-panel" class="space-y-6 animate-in delay-300">
+                        <section id="config-summary" class="hidden glass-panel rounded-3xl p-6">
+                            <h3 class="text-base font-bold text-white mb-4 flex items-center gap-2">
+                                <svg class="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+                                Architecture
+                            </h3>
+                            <div class="grid grid-cols-2 gap-3 text-sm">
+                                <div class="bg-slate-900/60 p-3 rounded-xl border border-white/5 text-center">
+                                    <div class="text-slate-400 text-[10px] uppercase tracking-wider mb-1">Pages</div>
+                                    <div class="text-white font-bold text-lg" id="summary-pages">0</div>
+                                </div>
+                                <div class="bg-slate-900/60 p-3 rounded-xl border border-white/5 text-center">
+                                    <div class="text-slate-400 text-[10px] uppercase tracking-wider mb-1">Endpoints</div>
+                                    <div class="text-white font-bold text-lg" id="summary-endpoints">0</div>
+                                </div>
+                                <div class="bg-slate-900/60 p-3 rounded-xl border border-white/5 text-center">
+                                    <div class="text-slate-400 text-[10px] uppercase tracking-wider mb-1">Entities</div>
+                                    <div class="text-white font-bold text-lg" id="summary-entities">0</div>
+                                </div>
+                                <div class="bg-slate-900/60 p-3 rounded-xl border border-white/5 text-center">
+                                    <div class="text-slate-400 text-[10px] uppercase tracking-wider mb-1">Components</div>
+                                    <div class="text-white font-bold text-lg" id="summary-components">0</div>
+                                </div>
+                            </div>
+                        </section>
+
+                        <section id="app-details" class="hidden glass-panel rounded-3xl p-6">
+                            <h3 class="text-base font-bold text-white mb-5">Schema & API</h3>
+                            <div class="space-y-6">
+                                <div>
+                                    <h4 class="text-[10px] font-bold text-indigo-400 uppercase tracking-widest mb-3 flex items-center gap-2">
+                                        <div class="w-1 h-1 bg-indigo-400 rounded-full"></div> Data Entities
+                                    </h4>
+                                    <ul id="entity-list" class="space-y-3"></ul>
+                                </div>
+                                <div>
+                                    <h4 class="text-[10px] font-bold text-purple-400 uppercase tracking-widest mb-3 flex items-center gap-2">
+                                        <div class="w-1 h-1 bg-purple-400 rounded-full"></div> Endpoints
+                                    </h4>
+                                    <ul id="endpoint-list" class="space-y-3"></ul>
+                                </div>
+                            </div>
+                        </section>
+
+                        <section id="evaluation-summary" class="hidden glass-panel rounded-3xl p-6 relative overflow-hidden">
+                            <div class="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-purple-500/5 pointer-events-none"></div>
+                            <h3 class="text-base font-bold text-white mb-4 relative z-10">Evaluation Metrics</h3>
+                            <div class="grid gap-3 sm:grid-cols-2 relative z-10">
+                                <div class="bg-slate-900/60 rounded-xl border border-white/5 p-4 text-center">
+                                    <p class="text-[10px] uppercase tracking-widest text-slate-400 mb-1">Success</p>
+                                    <p id="eval-success-rate" class="text-2xl font-extrabold text-emerald-400">0%</p>
+                                </div>
+                                <div class="bg-slate-900/60 rounded-xl border border-white/5 p-4 text-center">
+                                    <p class="text-[10px] uppercase tracking-widest text-slate-400 mb-1">Latency</p>
+                                    <p id="eval-latency" class="text-2xl font-extrabold text-indigo-400">0s</p>
+                                </div>
+                                <div class="bg-slate-900/60 rounded-xl border border-white/5 p-3 text-center">
+                                    <p class="text-[10px] uppercase tracking-widest text-slate-400 mb-1">Real-World</p>
+                                    <p id="eval-real-success" class="text-lg font-bold text-white">0%</p>
+                                </div>
+                                <div class="bg-slate-900/60 rounded-xl border border-white/5 p-3 text-center">
+                                    <p class="text-[10px] uppercase tracking-widest text-slate-400 mb-1">Edge Case</p>
+                                    <p id="eval-edge-success" class="text-lg font-bold text-white">0%</p>
+                                </div>
+                                <div class="sm:col-span-2 bg-slate-900/60 rounded-xl border border-white/5 p-4 flex justify-between items-center">
+                                    <div>
+                                        <p class="text-[10px] uppercase tracking-widest text-slate-400">Total Tests</p>
+                                        <p id="eval-total-tests" class="text-lg font-bold text-white">0</p>
+                                    </div>
+                                    <div class="text-right">
+                                        <p class="text-xs text-emerald-400 font-medium"><span id="eval-successful-tests">0</span> Passed</p>
+                                        <p class="text-xs text-red-400 font-medium"><span id="eval-failed-tests">0</span> Failed</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+
+                        <section id="raw-json-panel" class="hidden bg-[#0d1117] border border-white/5 rounded-3xl p-5 shadow-inner">
+                            <h3 class="text-xs font-bold text-slate-300 mb-3 flex justify-between items-center uppercase tracking-wider">
+                                Raw Manifest
+                                <span class="text-[9px] bg-white/10 px-2 py-0.5 rounded text-slate-400">JSON</span>
+                            </h3>
+                            <div class="overflow-auto h-[240px] pr-2">
+                                <pre id="raw-config" class="text-[10px] text-indigo-200/70 font-mono"></pre>
+                            </div>
+                        </section>
+                    </aside>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script>
+        const btn = document.getElementById('compile-btn');
+        const sidebar = document.getElementById('sidebar');
+        const grid = document.getElementById('component-grid');
+        const appInfo = document.getElementById('app-info');
+        const summaryName = document.getElementById('app-display-name');
+        const summaryPages = document.getElementById('summary-pages');
+        const summaryEndpoints = document.getElementById('summary-endpoints');
+        const summaryEntities = document.getElementById('summary-entities');
+        const summaryComponents = document.getElementById('summary-components');
+        const configSummary = document.getElementById('config-summary');
+        const appDetails = document.getElementById('app-details');
+        const rawJsonPanel = document.getElementById('raw-json-panel');
+        const entityList = document.getElementById('entity-list');
+        const endpointList = document.getElementById('endpoint-list');
+        const rawConfig = document.getElementById('raw-config');
+        const evaluationSummary = document.getElementById('evaluation-summary');
+        const evalSuccessRate = document.getElementById('eval-success-rate');
+        const evalLatency = document.getElementById('eval-latency');
+        const evalRealSuccess = document.getElementById('eval-real-success');
+        const evalEdgeSuccess = document.getElementById('eval-edge-success');
+        const evalTotalTests = document.getElementById('eval-total-tests');
+        const evalSuccessfulTests = document.getElementById('eval-successful-tests');
+        const evalFailedTests = document.getElementById('eval-failed-tests');
+        const localWarning = document.getElementById('local-warning');
+        const serverWarning = document.getElementById('server-warning');
+        const statusBanner = document.getElementById('status-banner');
+        const statusText = document.getElementById('status-text');
+        const API_BASE_URL = window.location.protocol === 'file:' ? 'http://localhost:8000' : window.location.origin;
+
+        function showStatus(message, level = 'info') {
+            statusText.innerText = message;
+            statusBanner.className = 'glass-panel mx-8 mt-6 p-4 rounded-xl shadow-lg animate-in border-l-4 text-sm';
+            if (level === 'error') {
+                statusBanner.classList.add('border-l-red-500', 'text-red-200');
+            } else if (level === 'warn') {
+                statusBanner.classList.add('border-l-amber-500', 'text-amber-200');
+            } else {
+                statusBanner.classList.add('border-l-indigo-500', 'text-indigo-200');
+            }
+            statusBanner.classList.remove('hidden');
+        }
+
+        function hideStatus() {
+            statusBanner.classList.add('hidden');
+        }
+
+        if (window.location.protocol === 'file:') {
+            localWarning.classList.remove('hidden');
+            showStatus('Loaded from a local file. Start the backend and open the app at http://localhost:8000/', 'warn');
+        }
+
+        async function runEvaluation() {
+            const evalBtn = document.getElementById('eval-btn');
+            evalBtn.innerText = "Evaluating...";
+            evalBtn.disabled = true;
+            evalBtn.classList.add('opacity-70', 'cursor-not-allowed');
+            serverWarning.classList.add('hidden');
+
+            if (window.location.protocol === 'file:') {
+                serverWarning.classList.remove('hidden');
+                showStatus('Cannot run evaluation from a local file. Start the backend server and open the app at http://localhost:8000/', 'error');
+                evalBtn.innerText = "Evaluate";
+                evalBtn.disabled = false;
+                evalBtn.classList.remove('opacity-70', 'cursor-not-allowed');
+                return;
+            }
+
+            hideStatus();
+            try {
+                const response = await fetch(`${API_BASE_URL}/evaluate`, { method: "POST" });
+                if (!response.ok) throw new Error("Evaluation failed");
+
+                const data = await response.json().catch(() => null);
+                const metrics = data?.metrics ?? data;
+                if (!metrics || typeof metrics !== 'object') {
+                    throw new Error('Invalid evaluation response structure');
+                }
+                displayEvaluationResults(metrics);
+            } catch (error) {
+                console.error("Evaluation Error:", error);
+                serverWarning.classList.remove('hidden');
+                showStatus(`Evaluation failed: ${error.message}`, 'error');
+            } finally {
+                evalBtn.innerText = "Evaluate";
+                evalBtn.disabled = false;
+                evalBtn.classList.remove('opacity-70', 'cursor-not-allowed');
+            }
+        }
+
+        function displayEvaluationResults(metrics) {
+            if (!metrics || typeof metrics !== 'object') metrics = {};
+
+            const safeNumber = value => {
+                const n = Number(value);
+                return Number.isFinite(n) ? n : 0;
+            };
+
+            const successRate = safeNumber(metrics.success_rate) * 100;
+            const realSuccess = safeNumber(metrics.real_world_success_rate) * 100;
+            const edgeSuccess = safeNumber(metrics.edge_case_success_rate) * 100;
+            const avgLatency = safeNumber(metrics.avg_latency);
+            
+            evaluationSummary.classList.remove('hidden');
+            evaluationSummary.classList.add('animate-in');
+            
+            evalSuccessRate.innerText = `${successRate.toFixed(1)}%`;
+            evalLatency.innerText = `${avgLatency.toFixed(2)}s`;
+            evalRealSuccess.innerText = `${realSuccess.toFixed(1)}%`;
+            evalEdgeSuccess.innerText = `${edgeSuccess.toFixed(1)}%`;
+            evalTotalTests.innerText = metrics.total_tests ?? 'N/A';
+            evalSuccessfulTests.innerText = metrics.successful_tests ?? '0';
+            evalFailedTests.innerText = metrics.failed_tests ?? '0';
+        }
+
+        async function compileSoftware() {
+            const prompt = document.getElementById('user-prompt').value;
+            if (!prompt) {
+                showStatus("Please enter a description.", 'warn');
+                return;
+            }
+
+            if (window.location.protocol === 'file:') {
+                serverWarning.classList.remove('hidden');
+                showStatus('Cannot compile from a local file. Start the backend server and open the app at http://localhost:8000/', 'error');
+                return;
+            }
+
+            hideStatus();
+            btn.innerHTML = `<span class="relative z-10 flex items-center gap-2"><svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>Compiling...</span>`;
+            btn.disabled = true;
+            btn.classList.add('opacity-80', 'cursor-not-allowed');
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/compile`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ prompt: prompt })
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => null);
+                    throw new Error(errorData?.detail || "Compilation failed");
+                }
+
+                const config = await response.json();
+                renderApplication(config);
+            } catch (error) {
+                console.error("Error:", error);
+                showStatus(`Failed to compile: ${error.message}`, 'error');
+            } finally {
+                btn.innerHTML = `<span class="relative z-10 flex items-center gap-2"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>Compile</span>`;
+                btn.disabled = false;
+                btn.classList.remove('opacity-80', 'cursor-not-allowed');
+            }
+        }
+
+        function updateStatusBadge(isValid) {
+            const badge = document.getElementById('status-badge');
+            if (isValid) {
+                badge.className = 'px-3 py-1.5 rounded-full text-xs font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 shadow-[0_0_15px_rgba(16,185,129,0.1)] flex items-center gap-2';
+                badge.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> Live & Validated';
+            } else {
+                badge.className = 'px-3 py-1.5 rounded-full text-xs font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20 flex items-center gap-2';
+                badge.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span> Issues Found';
+            }
+        }
+
+        function renderApplication(config) {
+            appInfo.classList.remove('hidden');
+            configSummary.classList.remove('hidden');
+            appDetails.classList.remove('hidden');
+            rawJsonPanel.classList.remove('hidden');
+
+            updateStatusBadge(config.is_valid);
+            showStatus(config.is_valid ? 'Application compiled successfully.' : `Compiled with validation issues: ${config.error_log || 'Unknown issue.'}`, config.is_valid ? 'info' : 'warn');
+
+            document.getElementById('app-display-name').innerText = config.app_name;
+            document.getElementById('current-page-title').innerHTML = `<span>${(config.ui_layout[0] || {}).title || 'No pages generated'}</span>`;
+            
+            summaryPages.innerText = config.ui_layout.length;
+            summaryEndpoints.innerText = config.endpoints.length;
+            summaryEntities.innerText = config.entities.length;
+            summaryComponents.innerText = config.ui_layout.reduce((acc, p) => acc + (p.components?.length || 0), 0);
+
+            entityList.innerHTML = config.entities.map((entity, i) => `
+                <li class="bg-slate-900/40 border border-white/5 p-3 rounded-xl animate-in" style="animation-delay: ${i * 50}ms">
+                    <strong class="text-indigo-300 text-sm">${entity.name}</strong>
+                    <div class="flex flex-wrap gap-1 mt-2">
+                        ${entity.fields.map(f => `<span class="text-[10px] bg-white/5 text-slate-400 px-2 py-0.5 rounded border border-white/5">${f}</span>`).join('')}
+                    </div>
+                </li>
+            `).join('');
+
+            endpointList.innerHTML = config.endpoints.map((endpoint, i) => `
+                <li class="bg-slate-900/40 border border-white/5 p-3 rounded-xl animate-in" style="animation-delay: ${i * 50}ms">
+                    <div class="flex items-center gap-2 mb-1">
+                        <span class="text-[10px] font-bold ${endpoint.method === 'GET' ? 'text-emerald-400 bg-emerald-400/10' : endpoint.method === 'POST' ? 'text-blue-400 bg-blue-400/10' : 'text-purple-400 bg-purple-400/10'} px-2 py-0.5 rounded">${endpoint.method}</span>
+                        <span class="text-slate-300 text-sm font-mono truncate">${endpoint.path}</span>
+                    </div>
+                    <p class="text-[11px] text-slate-500 mt-1">${endpoint.description}</p>
+                </li>
+            `).join('');
+
+            rawConfig.innerText = JSON.stringify(config, null, 2);
+            buildSidebar(config.ui_layout);
+            displayPage(config.ui_layout[0] || { title: 'No pages', components: [] });
+        }
+
+        function buildSidebar(pages) {
+            sidebar.innerHTML = `
+                <div class="flex items-center gap-2 mb-4 px-2">
+                    <div class="w-1.5 h-1.5 rounded-full bg-indigo-500 shadow-[0_0_8px_rgba(99,102,241,0.8)]"></div>
+                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Navigation</p>
+                </div>
+            `;
+
+            if (!pages.length) {
+                sidebar.innerHTML += '<div class="text-sm text-slate-500 px-4 py-3">No pages generated.</div>';
+                return;
+            }
+
+            pages.forEach((page, index) => {
+                const navBtn = document.createElement('button');
+                navBtn.className = `w-full text-left px-4 py-3 rounded-xl text-sm font-medium transition-all ${index === 0 ? 'sidebar-active text-indigo-300' : 'text-slate-400 hover:bg-white/5 hover:text-slate-200'}`;
+                navBtn.innerHTML = `<span class="flex items-center gap-2"><svg class="w-4 h-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"></path></svg> ${page.title}</span>`;
+                navBtn.onclick = () => {
+                    document.querySelectorAll('#sidebar button').forEach(b => {
+                        b.classList.remove('sidebar-active', 'text-indigo-300');
+                        b.classList.add('text-slate-400');
+                    });
+                    navBtn.classList.add('sidebar-active', 'text-indigo-300');
+                    navBtn.classList.remove('text-slate-400');
+                    displayPage(page);
+                };
+                sidebar.appendChild(navBtn);
+            });
+        }
+
+        function displayPage(page) {
+            document.getElementById('current-page-title').innerHTML = `<span>${page.title}</span>`;
+            grid.innerHTML = '';
+
+            if (!page.components || !page.components.length) {
+                grid.innerHTML = `<div class="col-span-full text-center py-20 glass-panel rounded-3xl text-slate-500 border border-white/5">No components on this page.</div>`;
+                return;
+            }
+
+            page.components.forEach((comp, i) => {
+                const card = document.createElement('div');
+                card.className = "component-card p-6 rounded-3xl animate-in";
+                card.style.animationDelay = `${i * 100}ms`;
+                
+                let icon = '';
+                switch(comp.component_type) {
+                    case 'Form': icon = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>'; break;
+                    case 'DataTable': icon = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path>'; break;
+                    case 'Chart': icon = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"></path>'; break;
+                    default: icon = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path>';
+                }
+
+                card.innerHTML = `
+                    <div class="flex justify-between items-start mb-5">
+                        <span class="text-[10px] font-bold uppercase tracking-widest text-indigo-300 bg-indigo-500/10 border border-indigo-500/20 px-2.5 py-1 rounded-full flex items-center gap-1.5">
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">${icon}</svg>
+                            ${comp.component_type}
+                        </span>
+                    </div>
+                    <h4 class="text-lg font-bold text-white mb-2">${comp.label}</h4>
+                    <p class="text-[11px] text-slate-400 mb-5 font-mono bg-slate-900/50 p-2 rounded border border-white/5 truncate" title="${comp.data_source}">API: ${comp.data_source}</p>
+                `;
+
+                if (comp.component_type === 'Form') {
+                    card.innerHTML += `
+                        <div class="space-y-3 mt-4">
+                            <input type="text" placeholder="Enter text..." class="w-full bg-slate-900/60 border border-white/10 text-white p-2.5 rounded-lg text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors placeholder-slate-600">
+                            <textarea placeholder="Enter details..." class="w-full bg-slate-900/60 border border-white/10 text-white p-2.5 rounded-lg text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors placeholder-slate-600 h-20 resize-none"></textarea>
+                            <button class="w-full bg-indigo-600 hover:bg-indigo-500 text-white py-2.5 rounded-lg text-sm font-semibold transition-colors shadow-lg">Submit Form</button>
+                        </div>
+                    `;
+                } else if (comp.component_type === 'DataTable') {
+                    card.innerHTML += `
+                        <div class="overflow-x-auto mt-4 rounded-xl border border-white/5 bg-slate-900/30">
+                            <table class="w-full text-left text-sm text-slate-300">
+                                <thead>
+                                    <tr class="bg-white/5 border-b border-white/5 text-[11px] uppercase tracking-wider text-slate-400">
+                                        <th class="p-3 font-medium">ID</th>
+                                        <th class="p-3 font-medium">Name</th>
+                                        <th class="p-3 font-medium">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr class="border-b border-white/5 hover:bg-white/5 transition-colors">
+                                        <td class="p-3 text-slate-400 font-mono text-xs">01</td>
+                                        <td class="p-3 font-medium text-white">System Update</td>
+                                        <td class="p-3"><span class="px-2 py-1 rounded text-[10px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">Active</span></td>
+                                    </tr>
+                                    <tr class="hover:bg-white/5 transition-colors">
+                                        <td class="p-3 text-slate-400 font-mono text-xs">02</td>
+                                        <td class="p-3 font-medium text-white">Data Sync</td>
+                                        <td class="p-3"><span class="px-2 py-1 rounded text-[10px] bg-blue-500/10 text-blue-400 border border-blue-500/20">Pending</span></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    `;
+                } else if (comp.component_type === 'Chart') {
+                    card.innerHTML += `
+                        <div class="h-40 mt-4 rounded-xl bg-slate-900/50 border border-white/5 flex flex-col items-center justify-center relative overflow-hidden group">
+                            <div class="absolute bottom-0 w-full flex items-end justify-around px-4 h-24 opacity-70 group-hover:opacity-100 transition-opacity">
+                                <div class="w-8 bg-indigo-500/80 rounded-t-sm h-12"></div>
+                                <div class="w-8 bg-purple-500/80 rounded-t-sm h-20"></div>
+                                <div class="w-8 bg-indigo-400/80 rounded-t-sm h-16"></div>
+                                <div class="w-8 bg-purple-400/80 rounded-t-sm h-8"></div>
+                                <div class="w-8 bg-indigo-500/80 rounded-t-sm h-14"></div>
+                            </div>
+                            <span class="text-xs text-slate-500 font-medium z-10 bg-slate-900/80 px-3 py-1 rounded-full border border-white/5">Interactive Chart</span>
+                        </div>
+                    `;
+                } else if (comp.component_type === 'Card') {
+                    card.innerHTML += `
+                        <div class="mt-4 rounded-xl bg-gradient-to-br from-indigo-500/10 to-purple-500/10 border border-white/5 p-5 text-slate-300">
+                            <div class="text-2xl font-bold text-white mb-1">1,248</div>
+                            <div class="text-xs text-slate-400 flex items-center gap-1">
+                                <span class="text-emerald-400 flex items-center"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"></path></svg> 12%</span> vs last month
+                            </div>
+                        </div>
+                    `;
+                } else if (comp.component_type === 'Navbar') {
+                    card.innerHTML += `
+                        <div class="mt-4 flex flex-wrap gap-2 text-sm">
+                            <a href="#" class="px-3 py-1.5 rounded-lg bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 hover:bg-indigo-500/30 transition-colors">Dashboard</a>
+                            <a href="#" class="px-3 py-1.5 rounded-lg bg-white/5 text-slate-400 border border-white/5 hover:bg-white/10 hover:text-white transition-colors">Settings</a>
+                            <a href="#" class="px-3 py-1.5 rounded-lg bg-white/5 text-slate-400 border border-white/5 hover:bg-white/10 hover:text-white transition-colors">Profile</a>
+                        </div>
+                    `;
+                } else {
+                    card.innerHTML += `<div class="mt-4 rounded-xl bg-slate-900/50 border border-white/5 p-4 text-xs text-slate-500 text-center">Custom Component Preview</div>`;
+                }
+
+                grid.appendChild(card);
+            });
+        }
+    </script>
+</body>
+</html>
